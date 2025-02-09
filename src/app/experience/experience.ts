@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, signal, viewChild } from '@angular/core';
 import { extend, injectBeforeRender, injectStore, is, NgtArgs, NgtThreeEvent } from 'angular-three';
 import { NgtpBloom, NgtpEffectComposer } from 'angular-three-postprocessing';
 import { NgtsPerspectiveCamera } from 'angular-three-soba/cameras';
 import { NgtsOrbitControls } from 'angular-three-soba/controls';
 import { NgtsEnvironment } from 'angular-three-soba/staging';
 import * as THREE from 'three';
+import { MotionBlur } from './motion-blur';
 import { Spaceship } from './spaceship';
 import { Stars } from './stars';
 
@@ -16,7 +17,14 @@ import { Stars } from './stars';
     <app-spaceship />
     <app-stars />
 
-    <ngt-mesh #plane [renderOrder]="2" [visible]="false" (pointermove)="onPointerMove($event)">
+    <ngt-mesh
+      #plane
+      [renderOrder]="2"
+      [visible]="false"
+      (pointermove)="onPointerMove($event)"
+      (pointerdown)="warping.set(true)"
+      (pointerup)="warping.set(false)"
+    >
       <ngt-plane-geometry *args="[20, 20]" />
       <ngt-mesh-basic-material transparent [opacity]="0.25" [color]="[1, 0, 1]" />
     </ngt-mesh>
@@ -26,6 +34,7 @@ import { Stars } from './stars';
 
     <ngtp-effect-composer>
       <ngtp-bloom [options]="{ kernelSize: 3, luminanceThreshold: 0, luminanceSmoothing: 0.9, intensity: 1.5 }" />
+      <app-motion-blur />
     </ngtp-effect-composer>
   `,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -39,15 +48,19 @@ import { Stars } from './stars';
     NgtArgs,
     Spaceship,
     Stars,
+    MotionBlur,
   ],
 })
 export class Experience {
   private spaceship = viewChild.required(Spaceship);
 
+  protected warping = signal(false);
+
   private translateAcceleration = 0;
   private translateY = 0;
   private angleAcceleration = 0;
   private angleZ = 0;
+  turbo = 0;
 
   private intersectionPoint = new THREE.Vector3();
 
@@ -59,7 +72,7 @@ export class Experience {
 
     let envMap: THREE.WebGLRenderTarget;
 
-    injectBeforeRender(({ scene }) => {
+    injectBeforeRender(({ scene, camera }) => {
       const spaceshipModel = this.spaceship().modelRef()?.nativeElement;
       if (!spaceshipModel) {
         scene.background = new THREE.Color(0x598889).multiplyScalar(0.05);
@@ -103,10 +116,27 @@ export class Experience {
           child.material.normalScale.set(0.3, 0.3);
         }
       });
+
+      if (this.warping()) {
+        this.turbo += 0.025;
+      } else {
+        this.turbo *= 0.95;
+      }
+
+      this.turbo = Math.min(Math.max(this.turbo, 0), 1);
+      const turboSpeed = this.easeOutQuad(this.turbo) * 0.02;
+      if (is.three<THREE.PerspectiveCamera>(camera, 'isPerspectiveCamera')) {
+        camera.fov = 25 + turboSpeed * 900;
+        camera.updateProjectionMatrix();
+      }
     });
   }
 
   protected onPointerMove(event: NgtThreeEvent<PointerEvent>) {
     this.intersectionPoint.set(-3, event.point.y, event.point.z);
+  }
+
+  private easeOutQuad(turbo: number) {
+    return 1 - (1 - turbo) * (1 - turbo);
   }
 }

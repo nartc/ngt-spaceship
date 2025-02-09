@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, viewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, viewChildren } from '@angular/core';
 import { injectTexture } from 'angular-three-soba/loaders';
 import { NgtsInstance, NgtsInstances } from 'angular-three-soba/performances';
 import * as THREE from 'three';
 
 import { injectBeforeRender, NgtArgs } from 'angular-three';
+import { Experience } from './experience';
 import starPng from './star.png' with { loader: 'file' };
 
 const colors = ['#fcaa67', '#c75d59', '#ffffc7', '#8cc5c6', '#a5898c'];
@@ -28,12 +29,13 @@ const colors = ['#fcaa67', '#c75d59', '#ffffc7', '#8cc5c6', '#a5898c'];
 })
 export class Stars {
   protected readonly DoubleSide = THREE.DoubleSide;
-  protected readonly count = 300;
+  protected readonly count = 350;
 
   protected readonly stars = Array.from({ length: this.count }, () => this.randomizeStar());
 
   private instances = viewChildren(NgtsInstance);
 
+  private experience = inject(Experience);
   protected texture = injectTexture(() => starPng);
 
   constructor() {
@@ -46,7 +48,8 @@ export class Stars {
           userData,
         } = instance.positionMeshRef().nativeElement;
 
-        iPosition.x += userData['speed'] * delta;
+        iPosition.x += userData['speed'] * delta + 1 * this.experience.turbo;
+
         if (iPosition.x > 40) {
           const { position, length, speed, color } = this.randomizeStar();
 
