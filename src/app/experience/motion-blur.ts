@@ -16,28 +16,27 @@ const fragmentShader = /* lang=glsl */ `
 uniform float strength;
 
 float rand2 (vec2 n) { 
-	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-    vec2 aspectCorrection = vec2(1.0, aspect);
-
-    vec2 dir = normalize(uv - vec2(0.5));
-    float dist = length(uv - vec2(0.5));
-    float positionalStrength = max(dist - 0.1, 0.0) * 0.1;
-    positionalStrength = pow(positionalStrength, 1.5) * 7.0;
-
+    // Fixed direction for left-to-right motion
+    vec2 dir = vec2(-1.0, 0.0);
+    
     vec4 accum = vec4(0.0);
-    for (int i = 0; i < 8; i++) {
-        vec2 offs1 = -dir * positionalStrength * strength * ((float(i) + rand2(uv * 5.0)) * 0.2);
-        vec2 offs2 = dir * positionalStrength * strength * ((float(i) + rand2(uv * 5.0)) * 0.2);
-
-        accum += texture2D(inputBuffer, uv + offs1);
-        accum += texture2D(inputBuffer, uv + offs2);
+    int samples = 8;
+    
+    for (int i = 0; i < samples; i++) {
+        // Add some randomness to the sampling
+        float offset = (float(i) / float(samples)) * strength;
+        float random = rand2(uv * 5.0 + float(i));
+        
+        // Sample in the fixed direction
+        vec2 offs = dir * offset * ((1.0 + random * 0.2) * 0.1);
+        accum += texture2D(inputBuffer, uv + offs);
     }
-    accum *= 1.0 / 14.0;
-
-    outputColor = accum;
+    
+    outputColor = accum / float(samples);
 }`;
 
 // Effect implementation
