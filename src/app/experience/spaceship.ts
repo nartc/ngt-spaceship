@@ -50,100 +50,103 @@ export type SpaceshipGLTFGLTFResult = GLTF & {
   template: `
     @if (gltf(); as gltf) {
       <ngt-group #model [parameters]="options()" [dispose]="null">
+        @let nodes = gltf.nodes;
+        @let materials = gltf.materials;
+
         <ngt-group [rotation.y]="-Math.PI / 2" [scale]="0.003" [position]="[0.95, 0, -2.235]">
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.257, -64.815, 64.771]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cylinder002_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cylinder002_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.691, -59.39, -553.376]"
             [rotation]="[Math.PI / 2, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cylinder003_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cylinder003_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[742.147, -64.535, -508.885]"
             [rotation]="[Math.PI / 2, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube003_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube003_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[737.618, 46.842, -176.413]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cylinder004_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cylinder004_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[789.518, 59.453, -224.912]"
             [rotation]="[1.003, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_RExtr001_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_RExtr001_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[745.539, 159.319, -5.922]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_RPanel003_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_RPanel003_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.257, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_RPanel003_RExtr_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_RPanel003_RExtr_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.257, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube002_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube002_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[736.789, -267.14, -33.214]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_RPanel001_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_RPanel001_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.257, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube001_RPanel003_RExtr001_spaceship_racer_0.geometry"
-            [material]="gltf.materials.spaceship_racer"
+            [geometry]="nodes.Cube001_RPanel003_RExtr001_spaceship_racer_0.geometry"
+            [material]="materials.spaceship_racer"
             [position]="[739.257, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Cube005_cockpit_0.geometry"
-            [material]="gltf.materials.cockpit"
+            [geometry]="nodes.Cube005_cockpit_0.geometry"
+            [material]="materials.cockpit"
             [position]="[739.446, 110.436, 307.179]"
             [rotation]="[0.087, 0, 0]"
           />
           <ngt-mesh
             castShadow
             receiveShadow
-            [geometry]="gltf.nodes.Sphere_cockpit_0.geometry"
-            [material]="gltf.materials.cockpit"
+            [geometry]="nodes.Sphere_cockpit_0.geometry"
+            [material]="materials.cockpit"
             [position]="[739.365, 145.689, 315.602]"
             [rotation]="[0.175, 0, 0]"
           />

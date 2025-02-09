@@ -15,19 +15,12 @@ const colors = ['#fcaa67', '#c75d59', '#ffffc7', '#8cc5c6', '#a5898c'];
       <ngt-plane-geometry *args="[1, 0.05]" />
       <ngt-mesh-basic-material [side]="DoubleSide" [alphaMap]="texture()" transparent />
 
-      @for (star of stars; track $index) {
+      @for (s of stars; track $index) {
         <ngts-instance
-          [options]="{
-            position: star.position,
-            scale: [star.length, 1, 1],
-            color: star.color,
-            userData: { speed: star.speed },
-          }"
+          [options]="{ position: s.position, scale: [s.length, 1, 1], color: s.color, userData: { speed: s.speed } }"
         />
       }
     </ngts-instances>
-
-    <ngt-mesh [position.y]="2"></ngt-mesh>
   `,
   imports: [NgtArgs, NgtsInstances, NgtsInstance],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -46,15 +39,21 @@ export class Stars {
   constructor() {
     injectBeforeRender(({ delta }) => {
       for (const instance of this.instances()) {
-        const positionMesh = instance.positionMeshRef().nativeElement;
-        positionMesh.position.x += positionMesh.userData['speed'] * delta;
-        if (positionMesh.position.x > 40) {
+        const {
+          position: iPosition,
+          scale: iScale,
+          color: iColor,
+          userData,
+        } = instance.positionMeshRef().nativeElement;
+
+        iPosition.x += userData['speed'] * delta;
+        if (iPosition.x > 40) {
           const { position, length, speed, color } = this.randomizeStar();
 
-          positionMesh.position.copy(position);
-          positionMesh.scale.setX(length);
-          positionMesh.color.copy(color);
-          positionMesh.userData['speed'] = speed;
+          iPosition.copy(position);
+          iScale.setX(length);
+          iColor.copy(color);
+          userData['speed'] = speed;
         }
       }
     });
