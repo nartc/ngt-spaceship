@@ -135,16 +135,12 @@ export type SpaceshipGLTFGLTFResult = GLTF & {
             [position]="[739.257, 0, 0]"
           />
           <ngt-mesh
-            castShadow
-            receiveShadow
             [geometry]="nodes.Cube005_cockpit_0.geometry"
             [material]="materials.cockpit"
             [position]="[739.446, 110.436, 307.179]"
             [rotation]="[0.087, 0, 0]"
           />
           <ngt-mesh
-            castShadow
-            receiveShadow
             [geometry]="nodes.Sphere_cockpit_0.geometry"
             [material]="materials.cockpit"
             [position]="[739.365, 145.689, 315.602]"
