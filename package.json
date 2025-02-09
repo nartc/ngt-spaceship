@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "watch": "ng build --watch --configuration development",
+    "test": "npx angular-three-gltf src/app/experience/spaceship.glb -o src/app/experience/spaceship-two.ts --selector app-spaceship --name Spaceship --shadows --importattribute -c"
   },
   "private": true,
   "dependencies": {
@@ -20,10 +21,12 @@
     "@monogrid/gainmap-js": "^3.1.0",
     "@pmndrs/vanilla": "^1.20.2",
     "angular-three": "next",
+    "angular-three-postprocessing": "next",
     "angular-three-soba": "next",
     "camera-controls": "^2.9.0",
     "maath": "^0.10.8",
     "ngxtension": "^4.3.2",
+    "postprocessing": "^6.36.7",
     "rxjs": "~7.8.1",
     "stats-gl": "^2.2.8",
     "three": "^0.173.0",

@@ -1,73 +1,111 @@
-import { DOCUMENT } from '@angular/common';
-import {
-  CUSTOM_ELEMENTS_SCHEMA,
-  ChangeDetectionStrategy,
-  Component,
-  Directive,
-  ElementRef,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { extend, getInstanceState, injectBeforeRender, injectObjectEvents } from 'angular-three';
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, viewChild } from '@angular/core';
+import { extend, injectBeforeRender, injectStore, is, NgtArgs, NgtThreeEvent } from 'angular-three';
+import { NgtpBloom, NgtpEffectComposer } from 'angular-three-postprocessing';
 import { NgtsPerspectiveCamera } from 'angular-three-soba/cameras';
 import { NgtsOrbitControls } from 'angular-three-soba/controls';
-import { BoxGeometry, GridHelper, Mesh, MeshBasicMaterial } from 'three';
-
-@Directive({ selector: '[cursorPointer]' })
-export class CursorPointer {
-  constructor() {
-    const document = inject(DOCUMENT);
-    const hostElement = inject<ElementRef<Mesh>>(ElementRef);
-    const mesh = hostElement.nativeElement;
-
-    const localState = getInstanceState(mesh);
-    if (!localState) return;
-
-    injectObjectEvents(() => mesh, {
-      pointerover: () => void (document.body.style.cursor = 'pointer'),
-      pointerout: () => void (document.body.style.cursor = 'default'),
-    });
-  }
-}
+import { NgtsEnvironment } from 'angular-three-soba/staging';
+import * as THREE from 'three';
+import { Spaceship } from './spaceship';
+import { Stars } from './stars';
 
 @Component({
   selector: 'app-experience',
   template: `
-    <ngts-perspective-camera [options]="{ makeDefault: true, position: [-3, 5, 5] }" />
+    <ngts-perspective-camera [options]="{ makeDefault: true, position: [-5, 6, 10], fov: 25 }" />
 
-    <ngt-mesh
-      #mesh
-      cursorPointer
-      (click)="clicked.set(!clicked())"
-      (pointerover)="hovered.set(true)"
-      (pointerout)="hovered.set(false)"
-      [scale]="clicked() ? 1.5 : 1"
-    >
-      <ngt-box-geometry />
-      <ngt-mesh-basic-material [color]="hovered() ? 'hotpink' : 'orange'" />
+    <app-spaceship />
+    <app-stars />
+
+    <ngt-mesh #plane [renderOrder]="2" [visible]="false" (pointermove)="onPointerMove($event)">
+      <ngt-plane-geometry *args="[20, 20]" />
+      <ngt-mesh-basic-material transparent [opacity]="0.25" [color]="[1, 0, 1]" />
     </ngt-mesh>
 
-    <ngt-grid-helper />
-
     <ngts-orbit-controls />
+    <ngts-environment [options]="{ preset: 'city' }" />
+
+    <ngtp-effect-composer>
+      <ngtp-bloom [options]="{ kernelSize: 3, luminanceThreshold: 0, luminanceSmoothing: 0.9, intensity: 1.5 }" />
+    </ngtp-effect-composer>
   `,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CursorPointer, NgtsOrbitControls, NgtsPerspectiveCamera],
+  imports: [
+    NgtsOrbitControls,
+    NgtsPerspectiveCamera,
+    NgtsEnvironment,
+    NgtpEffectComposer,
+    NgtpBloom,
+    NgtArgs,
+    Spaceship,
+    Stars,
+  ],
 })
 export class Experience {
-  private meshRef = viewChild.required<ElementRef<Mesh>>('mesh');
+  private spaceship = viewChild.required(Spaceship);
 
-  protected hovered = signal(false);
-  protected clicked = signal(false);
+  private translateAcceleration = 0;
+  private translateY = 0;
+  private angleAcceleration = 0;
+  private angleZ = 0;
+
+  private intersectionPoint = new THREE.Vector3();
 
   constructor() {
-    extend({ Mesh, BoxGeometry, MeshBasicMaterial, GridHelper });
-    injectBeforeRender(({ delta }) => {
-      const mesh = this.meshRef().nativeElement;
-      mesh.rotation.x += delta;
-      mesh.rotation.y += delta;
+    extend(THREE);
+
+    const store = injectStore();
+    const pmrem = new THREE.PMREMGenerator(store.snapshot.gl);
+
+    let envMap: THREE.WebGLRenderTarget;
+
+    injectBeforeRender(({ scene }) => {
+      const spaceshipModel = this.spaceship().modelRef()?.nativeElement;
+      if (!spaceshipModel) {
+        scene.background = new THREE.Color(0x598889).multiplyScalar(0.05);
+        return;
+      }
+
+      this.translateAcceleration += (this.intersectionPoint.y - this.translateY) * 0.002;
+      this.translateAcceleration *= 0.95;
+      this.translateY += this.translateAcceleration;
+
+      const dir = this.intersectionPoint
+        .clone()
+        .sub(new THREE.Vector3(0, this.translateY, 0))
+        .normalize();
+      const dirCos = dir.dot(new THREE.Vector3(0, 1, 0));
+      const angle = Math.acos(dirCos) - Math.PI * 0.5;
+
+      this.angleAcceleration += (angle - this.angleZ) * 0.01;
+      this.angleAcceleration *= 0.85;
+      this.angleZ += this.angleAcceleration;
+
+      spaceshipModel.position.setY(this.translateY);
+      spaceshipModel.rotation.set(this.angleZ, 0, this.angleZ, 'ZXY');
+
+      if (envMap) envMap.dispose();
+
+      spaceshipModel.visible = false;
+      scene.background = null;
+      envMap = pmrem.fromScene(scene);
+      scene.background = new THREE.Color(0x598889).multiplyScalar(0.05);
+      spaceshipModel.visible = true;
+
+      spaceshipModel.traverse((child) => {
+        if (
+          is.three<THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>>(child, 'isMesh') &&
+          child.material.envMapIntensity
+        ) {
+          child.material.envMap = envMap.texture;
+          child.material.envMapIntensity = 100;
+          child.material.normalScale.set(0.3, 0.3);
+        }
+      });
     });
+  }
+
+  protected onPointerMove(event: NgtThreeEvent<PointerEvent>) {
+    this.intersectionPoint.set(-3, event.point.y, event.point.z);
   }
 }
