@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, viewChild }
 import { extend, injectBeforeRender, injectStore, is, NgtArgs, NgtThreeEvent } from 'angular-three';
 import { NgtpBloom, NgtpEffectComposer } from 'angular-three-postprocessing';
 import { NgtsPerspectiveCamera } from 'angular-three-soba/cameras';
+import { NgtsOrbitControls } from 'angular-three-soba/controls';
 import { NgtsEnvironment } from 'angular-three-soba/staging';
 import * as THREE from 'three';
 import { Spaceship } from './spaceship';
@@ -20,6 +21,7 @@ import { Stars } from './stars';
       <ngt-mesh-basic-material transparent [opacity]="0.25" [color]="[1, 0, 1]" />
     </ngt-mesh>
 
+    <ngts-orbit-controls [options]="{ enableZoom: false, enablePan: false, enableRotate: false, target: [0, 0, 0] }" />
     <ngts-environment [options]="{ preset: 'city' }" />
 
     <ngtp-effect-composer>
@@ -28,7 +30,16 @@ import { Stars } from './stars';
   `,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgtsPerspectiveCamera, NgtsEnvironment, NgtpEffectComposer, NgtpBloom, NgtArgs, Spaceship, Stars],
+  imports: [
+    NgtsPerspectiveCamera,
+    NgtsEnvironment,
+    NgtsOrbitControls,
+    NgtpEffectComposer,
+    NgtpBloom,
+    NgtArgs,
+    Spaceship,
+    Stars,
+  ],
 })
 export class Experience {
   private spaceship = viewChild.required(Spaceship);
