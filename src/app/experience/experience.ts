@@ -22,7 +22,7 @@ import { Stars } from './stars';
       <ngt-mesh-basic-material transparent [opacity]="0.25" [color]="[1, 0, 1]" />
     </ngt-mesh>
 
-    <ngts-orbit-controls [options]="{ enablePan: false, target: [0, 0, 0] }" />
+    <ngts-orbit-controls [options]="{ enablePan: false, enableRotate: false, target: [0, 0, 0] }" />
     <ngts-environment [options]="{ preset: 'city' }" />
 
     <ngtp-effect-composer>
