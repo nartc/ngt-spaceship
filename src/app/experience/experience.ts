@@ -44,8 +44,8 @@ import { Stars } from './stars';
     MotionBlur,
   ],
   host: {
-    '(document:keydown)': 'onKeyDown($event)',
-    '(document:keyup)': 'onKeyUp($event)',
+    '(document:pointerdown)': '$event.stopPropagation(); warping.set(true)',
+    '(document:pointerup)': '$event.stopPropagation(); warping.set(false)',
   },
 })
 export class Experience {
@@ -154,16 +154,6 @@ export class Experience {
   protected onPointerMove(event: NgtThreeEvent<PointerEvent>) {
     if (this.warping()) return;
     this.intersectionPoint.set(-3, event.point.y, event.point.z);
-  }
-
-  protected onKeyDown(event: KeyboardEvent) {
-    if (event.key !== 'Shift') return;
-    this.warping.set(true);
-  }
-
-  protected onKeyUp(event: KeyboardEvent) {
-    if (event.key !== 'Shift') return;
-    this.warping.set(false);
   }
 
   private easeOutQuad(turbo: number) {
