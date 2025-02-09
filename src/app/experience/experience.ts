@@ -17,19 +17,12 @@ import { Stars } from './stars';
     <app-spaceship />
     <app-stars />
 
-    <ngt-mesh
-      #plane
-      [renderOrder]="2"
-      [visible]="false"
-      (pointermove)="onPointerMove($event)"
-      (pointerdown)="warping.set(true)"
-      (pointerup)="warping.set(false)"
-    >
+    <ngt-mesh [renderOrder]="2" [visible]="false" (pointermove)="onPointerMove($event)">
       <ngt-plane-geometry *args="[20, 20]" />
       <ngt-mesh-basic-material transparent [opacity]="0.25" [color]="[1, 0, 1]" />
     </ngt-mesh>
 
-    <ngts-orbit-controls [options]="{ enableZoom: false, enablePan: false, enableRotate: false, target: [0, 0, 0] }" />
+    <ngts-orbit-controls [options]="{ enablePan: false, target: [0, 0, 0] }" />
     <ngts-environment [options]="{ preset: 'city' }" />
 
     <ngtp-effect-composer>
@@ -50,6 +43,10 @@ import { Stars } from './stars';
     Stars,
     MotionBlur,
   ],
+  host: {
+    '(document:keydown)': 'onKeyDown($event)',
+    '(document:keyup)': 'onKeyUp($event)',
+  },
 })
 export class Experience {
   private spaceship = viewChild.required(Spaceship);
@@ -119,8 +116,30 @@ export class Experience {
 
       if (this.warping()) {
         this.turbo += 0.025;
+
+        // Move camera behind ship when warping
+        if (is.three<THREE.PerspectiveCamera>(camera, 'isPerspectiveCamera')) {
+          // Calculate target position behind ship
+          const shipPosition = spaceshipModel.position.clone();
+          const behindOffset = new THREE.Vector3(5, 1, 1); // Adjust these values
+
+          // Apply ship's rotation to the offset
+          behindOffset.applyEuler(spaceshipModel.rotation);
+          const targetPosition = shipPosition.add(behindOffset);
+
+          // Smoothly interpolate camera position
+          camera.position.lerp(targetPosition, 0.1); // Adjust 0.1 for smoother/faster transition
+
+          // Make camera look at ship
+          camera.lookAt(spaceshipModel.position);
+        }
       } else {
         this.turbo *= 0.95;
+        // Return to original position when not warping
+        if (is.three<THREE.PerspectiveCamera>(camera, 'isPerspectiveCamera')) {
+          const originalPosition = new THREE.Vector3(-5, 6, 10);
+          camera.position.lerp(originalPosition, 0.05); // Slower transition back
+        }
       }
 
       this.turbo = Math.min(Math.max(this.turbo, 0), 1);
@@ -133,7 +152,18 @@ export class Experience {
   }
 
   protected onPointerMove(event: NgtThreeEvent<PointerEvent>) {
+    if (this.warping()) return;
     this.intersectionPoint.set(-3, event.point.y, event.point.z);
+  }
+
+  protected onKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Shift') return;
+    this.warping.set(true);
+  }
+
+  protected onKeyUp(event: KeyboardEvent) {
+    if (event.key !== 'Shift') return;
+    this.warping.set(false);
   }
 
   private easeOutQuad(turbo: number) {
