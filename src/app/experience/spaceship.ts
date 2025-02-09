@@ -10,13 +10,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
-  effect,
   ElementRef,
-  inject,
   input,
   viewChild,
 } from '@angular/core';
-import { extend, NgtArgs, NgtObjectEvents, type NgtThreeElements } from 'angular-three';
+import { extend, NgtArgs, type NgtThreeElements } from 'angular-three';
 import { injectGLTF, injectTexture } from 'angular-three-soba/loaders';
 import * as THREE from 'three';
 import { Group, Mesh } from 'three';
@@ -168,26 +166,6 @@ export type SpaceshipGLTFGLTFResult = GLTF & {
     }
   `,
   imports: [NgtArgs],
-  hostDirectives: [
-    {
-      directive: NgtObjectEvents,
-      outputs: [
-        'click',
-        'dblclick',
-        'contextmenu',
-        'pointerup',
-        'pointerdown',
-        'pointerover',
-        'pointerout',
-        'pointerenter',
-        'pointerleave',
-        'pointermove',
-        'pointermissed',
-        'pointercancel',
-        'wheel',
-      ],
-    },
-  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -211,14 +189,6 @@ export class Spaceship {
 
   constructor() {
     extend({ Group, Mesh });
-
-    const objectEvents = inject(NgtObjectEvents, { host: true });
-    effect(() => {
-      const model = this.modelRef()?.nativeElement;
-      if (!model) return;
-
-      objectEvents.ngtObjectEvents.set(model);
-    });
   }
 
   private alphaFix(material: THREE.MeshStandardMaterial) {

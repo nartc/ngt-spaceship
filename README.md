@@ -10,8 +10,8 @@ This is a template to get started with Angular Three.
 ## Features
 
 - Angular 19
-- Angular Three v3
-- THREE.js 0.171
+- Angular Three v4 next
+- THREE.js 0.173
 - `.glsl` loader setup
-- Tailwind CSS
+- Tailwind CSS v4
 - Prettier

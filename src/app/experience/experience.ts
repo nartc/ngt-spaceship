@@ -75,6 +75,7 @@ export class Experience {
 
       if (envMap) envMap.dispose();
 
+      // setup env map
       spaceshipModel.visible = false;
       scene.background = null;
       envMap = pmrem.fromScene(scene);
