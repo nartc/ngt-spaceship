@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgtCanvas, NgtCanvasContent } from 'angular-three/dom';
-import { Experience } from './experience/experience.component';
+import { Experience } from './experience/experience';
 
 @Component({
   selector: 'app-root',
